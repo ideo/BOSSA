@@ -33,13 +33,13 @@ OS:=$(shell uname -s | cut -c -7)
 #
 # Windows rules
 #
-ifeq ($(OS),MINGW32)
+ifeq ($(OS),MINGW64)
 # Use wxWindows development branch to work around font scaling issues on Windows
 WXVERSION=3.1
 EXE=.exe
 COMMON_SRCS+=WinSerialPort.cpp WinPortFactory.cpp
 COMMON_LDFLAGS=-Wl,--enable-auto-import -static -static-libstdc++ -static-libgcc
-COMMON_LIBS=-ltermcap -Wl,--as-needed -lsetupapi
+COMMON_LIBS=-Wl,--as-needed -lsetupapi
 BOSSA_RC=BossaRes.rc
 WIXDIR="C:\Program Files (x86)\WiX Toolset v3.11\bin"
 CODE_SIGN=$(INSTALLDIR)\\code_sign.p12
@@ -194,7 +194,7 @@ ARMOBJCOPY=$(ARM)objcopy
 #
 # CXX Flags
 #
-COMMON_CXXFLAGS+=-Wall -Werror -MT $@ -MD -MP -MF $(@:%.o=%.d) -DVERSION=\"$(VERSION)\" -g -O2 $(CXXFLAGS)
+COMMON_CXXFLAGS+=-Wall -Werror -MT $@ -MD -MP -MF $(@:%.o=%.d) -DVERSION=\"$(VERSION)\" -D_GLIBCXX_USE_CXX11_ABI=0 -g -O2 $(CXXFLAGS)
 WX_CXXFLAGS:=$(shell wx-config --cxxflags --version=$(WXVERSION)) -DWX_PRECOMP -Wno-ctor-dtor-privacy -O2 -fno-strict-aliasing
 BOSSA_CXXFLAGS=$(COMMON_CXXFLAGS) $(WX_CXXFLAGS)
 BOSSAC_CXXFLAGS=$(COMMON_CXXFLAGS)
@@ -261,7 +261,7 @@ $(foreach src,$(BOSSA_SRCS),$(eval $(call bossa_obj,$(src))))
 #
 # Resource rules
 #
-ifeq ($(OS),MINGW32)
+ifeq ($(OS),MINGW64)
 $(OBJDIR)/$(BOSSA_RC:%.rc=%.o): $(RESDIR)/$(BOSSA_RC)
 	@echo RC $<
 	$(Q)`wx-config --rescomp --version=$(WXVERSION)` -o $@ $<
