@@ -223,6 +223,10 @@ BOSSASH_LIBS=-lreadline $(COMMON_LIBS)
 all: $(BINDIR)/bossa$(EXE) $(BINDIR)/bossac$(EXE) $(BINDIR)/bossash$(EXE)
 bossac: $(BINDIR)/bossac$(EXE)
 
+GCC_ARCH:=$(shell gcc -v 2>&1 | awk '/Target/ { print $$2 }')
+archive: bossac$(EXE)
+	tar cvzf $(BINDIR)/bossac-$(VERSION)-$(GCC_ARCH).tgz -C $(BINDIR) bossac$(EXE)
+
 #
 # Common rules
 #
