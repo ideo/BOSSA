@@ -2,9 +2,8 @@ name: Makefile CI
 
 on:
   push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+    tags:
+      - "*"
 
 jobs:
   build:
@@ -38,3 +37,12 @@ jobs:
 
       - name: Build binaries
         run: make bossac
+      - name: Archive binaries
+        run: make archive
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: bin/bossa*.tar.gz
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
