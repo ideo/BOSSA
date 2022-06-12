@@ -224,7 +224,7 @@ all: $(BINDIR)/bossa$(EXE) $(BINDIR)/bossac$(EXE) $(BINDIR)/bossash$(EXE)
 bossac: $(BINDIR)/bossac$(EXE)
 
 GCC_ARCH:=$(shell gcc -v 2>&1 | awk '/Target/ { print $$2 }')
-archive: $(BINDIR)/bossac$(EXE)
+archive: bossac
 	tar cvzf $(BINDIR)/bossac-$(VERSION)-$(GCC_ARCH).tar.gz -C $(BINDIR) bossac$(EXE)
 
 #

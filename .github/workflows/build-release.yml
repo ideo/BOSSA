@@ -37,6 +37,27 @@ jobs:
 
       - name: Build binaries
         run: make bossac
+      - name: Codesign MacOS executable
+        if: matrix.os == 'macos-latest'
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_KEYCHAIN_PWD: ${{ secrets.MACOS_KEYCHAIN_PWD }}
+          MACOS_SIGNER_ID: ${{ secrets.MACOS_SIGNER_ID }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$MACOS_CERTIFICATE" | base64 --decode --output $CERTIFICATE_PATH
+
+          security create-keychain -p "$MACOS_KEYCHAIN_PWD" $KEYCHAIN_PATH
+          security default-keychain -s $KEYCHAIN_PATH
+          security unlock-keychain -p "$MACOS_KEYCHAIN_PWD" $KEYCHAIN_PATH
+          security import $CERTIFICATE_PATH -k $KEYCHAIN_PATH -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_KEYCHAIN_PWD" $KEYCHAIN_PATH
+          /usr/bin/codesign --force -s "$MACOS_SIGNER_ID" ./bin/bossac
+
       - name: Archive binaries
         run: make archive
       - name: Upload binaries to release
